@@ -63,14 +63,17 @@ namespace MyLaps
         return available;
     }
 
-    std::pair<std::string, std::string> RcsServer::_get_winner(const std::string& ref) {
+    std::map<std::string, std::vector<std::string>> RcsServer::results_reader(const std::string& ref) {
         std::ifstream raw("results/" + ref + ".json");
-        json reader;
-        raw >> reader;
+        json j_reader;
+        raw >> j_reader;
+        return j_reader.get<std::map<std::string, std::vector<std::string>>>();
+    }
 
+    std::pair<std::string, std::string> RcsServer::_get_winner(const std::map<std::string, std::vector<std::string>>& results) {
         int best = std::numeric_limits<int>::max();
         std::string winner, winning_lap;
-        for (auto& [car, laps]: reader.get<std::map<std::string, std::vector<std::string>>>()) {
+        for (auto& [car, laps]: results) {
             for (size_t i = 0; i < laps.size() - 1; i++) {
                 auto start = laps[i];
                 auto end = laps[i+1];
@@ -83,6 +86,11 @@ namespace MyLaps
             }
         }
         return std::make_pair(winner, winning_lap);
+    }
+
+    std::pair<std::string, std::string> RcsServer::_get_winner(const std::string& ref) {
+        auto results = results_reader(ref);
+        return _get_winner(std::move(results));
     }
 
     void RcsServer::set_results(const Rest::Request& request, Http::ResponseWriter response) {

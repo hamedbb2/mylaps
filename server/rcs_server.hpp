@@ -22,6 +22,7 @@ class RcsServer {
         void setup_routes();
         std::string current_ts();
         int time_to_int(std::string lap_time);
+        std::map<std::string, std::vector<std::string>> results_reader(const std::string& ref);
 
         //Routes
         void set_results(const Rest::Request& request, Http::ResponseWriter response);
@@ -32,6 +33,7 @@ class RcsServer {
         std::string _set_results(json results);
         std::vector<std::string> _get_results();
         std::pair<std::string, std::string> _get_winner(const std::string& ref);
+        std::pair<std::string, std::string> _get_winner(const std::map<std::string, std::vector<std::string>>& results);
 
     private:
         std::shared_ptr<Http::Endpoint> _http_endpoint;
