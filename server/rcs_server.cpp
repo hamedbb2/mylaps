@@ -41,9 +41,9 @@ namespace MyLaps
     void RcsServer::set_results([[maybe_unused]] const Rest::Request& request, Http::ResponseWriter response) {
         const auto results = json::parse(request.body());
         const auto storing_ref = current_ts();
-        std::thread([storing_ref, results] { //in-mem-copy to disk-copy tradeoff
+        std::thread([storing_ref, data = std::move(results)] { //in-mem-copy to disk-copy tradeoff
             std::ofstream o("results/" + storing_ref + ".json"); 
-            o << std::setw(4) << results << std::endl;
+            o << std::setw(4) << data << std::endl;
         }).detach();
         json res = {{"reference", storing_ref}};
         response.send(Http::Code::Ok, res.dump());
