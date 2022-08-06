@@ -5,6 +5,8 @@
 #include <thread>
 #include <filesystem>
 #include <vector>
+#include <algorithm>
+#include <limits>
 
 namespace MyLaps
 {
@@ -38,6 +40,11 @@ namespace MyLaps
         return std::to_string(ms.count());
     }
 
+    int RcsServer::time_to_int(std::string lap_time) {
+        lap_time.erase(std::remove(lap_time.begin(), lap_time.end(), ':'), lap_time.end());
+        return std::stoi(lap_time);
+    }
+
     std::string RcsServer::_set_results(json results) {
         const auto storing_ref = current_ts();
         std::thread([storing_ref, data = std::move(results)] {
@@ -56,14 +63,26 @@ namespace MyLaps
         return available;
     }
 
-    std::pair<std::string, std::string> RcsServer::_get_winner(std::string ref) {
+    std::pair<std::string, std::string> RcsServer::_get_winner(const std::string& ref) {
         std::ifstream raw("results/" + ref + ".json");
         json reader;
         raw >> reader;
+
+        int best = std::numeric_limits<int>::max();
+        std::string winner, winning_lap;
         for (auto& [car, laps]: reader.get<std::map<std::string, std::vector<std::string>>>()) {
-            return std::make_pair(car, laps[0]);
+            for (size_t i = 0; i < laps.size() - 1; i++) {
+                auto start = laps[i];
+                auto end = laps[i+1];
+                auto lap_time = time_to_int(end) - time_to_int(start);
+                if (lap_time < best) {
+                    best = lap_time;
+                    winner = car;
+                    winning_lap = start + "-" + end;
+                }
+            }
         }
-        return std::make_pair("", "");
+        return std::make_pair(winner, winning_lap);
     }
 
     void RcsServer::set_results(const Rest::Request& request, Http::ResponseWriter response) {
@@ -77,10 +96,10 @@ namespace MyLaps
         response.send(Http::Code::Ok, res.dump());
     }
 
-    void RcsServer::get_winner([[maybe_unused]] const Rest::Request& request, Http::ResponseWriter response) {
+    void RcsServer::get_winner(const Rest::Request& request, Http::ResponseWriter response) {
         const auto ref = request.param(":ref").as<std::string>();
         const auto winner = _get_winner(ref);
-        json res = {{"winner", winner.first}, {"lap", winner.second}};
+        json res = {{"winner", winner.first}, {"winning_lap", winner.second}};
         response.send(Http::Code::Ok, res.dump());
     }
 };
