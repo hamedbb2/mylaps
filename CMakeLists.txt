@@ -41,4 +41,5 @@ set_target_properties(pistache_static PROPERTIES
 )
 find_package(nlohmann_json REQUIRED)
 
-add_subdirectory(server)
+add_subdirectory(src)
+add_subdirectory(tests)

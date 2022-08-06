@@ -13,9 +13,13 @@ using namespace nlohmann;
 
 class RcsServer {
     public:
+        explicit RcsServer() {};
         explicit RcsServer(Address addr);
         void init(size_t thr);
         void start();
+
+        //For test
+        std::pair<std::string, std::string> _get_winner(const std::map<std::string, std::vector<std::string>>& results);
 
     private:
         //Helpers
@@ -29,11 +33,10 @@ class RcsServer {
         void get_results(const Rest::Request& request, Http::ResponseWriter response);
         void get_winner(const Rest::Request& request, Http::ResponseWriter response);
 
-        //Logics
+        //Logics (should move to a separate class in production code)
         std::string _set_results(json results);
         std::vector<std::string> _get_results();
         std::pair<std::string, std::string> _get_winner(const std::string& ref);
-        std::pair<std::string, std::string> _get_winner(const std::map<std::string, std::vector<std::string>>& results);
 
     private:
         std::shared_ptr<Http::Endpoint> _http_endpoint;

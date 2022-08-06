@@ -80,4 +80,4 @@ RUN ${CMAKE} ${PROJECT_ROOT} \
     ${MAKE} -j${PARALLEL_BUILD_PROC:-1}
 
 EXPOSE 9080
-CMD ["server/RCSServer"]
+CMD ["tests/server/TestServer", "src/RestServer"]
