@@ -29,7 +29,7 @@ class RcsServer {
         //Logics
         std::string _set_results(json results);
         std::vector<std::string> _get_results();
-        // std::pair<std::string, std::string> _get_winner();
+        std::pair<std::string, std::string> _get_winner(std::string ref);
 
     private:
         std::shared_ptr<Http::Endpoint> _http_endpoint;

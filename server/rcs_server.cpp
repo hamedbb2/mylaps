@@ -27,7 +27,7 @@ namespace MyLaps
         using namespace Rest;
         Routes::Post(_router, "/results", Routes::bind(&RcsServer::set_results, this));
         Routes::Get(_router, "/results", Routes::bind(&RcsServer::get_results, this));
-        Routes::Get(_router, "/winner", Routes::bind(&RcsServer::get_winner, this));
+        Routes::Get(_router, "/winner/:ref", Routes::bind(&RcsServer::get_winner, this));
     }
 
     std::string RcsServer::current_ts() {
@@ -56,9 +56,15 @@ namespace MyLaps
         return available;
     }
 
-    // std::pair<std::string, std::string> RcsServer::_get_winner() {
-
-    // }
+    std::pair<std::string, std::string> RcsServer::_get_winner(std::string ref) {
+        std::ifstream raw("results/" + ref + ".json");
+        json reader;
+        raw >> reader;
+        for (auto& [car, laps]: reader.get<std::map<std::string, std::vector<std::string>>>()) {
+            return std::make_pair(car, laps[0]);
+        }
+        return std::make_pair("", "");
+    }
 
     void RcsServer::set_results(const Rest::Request& request, Http::ResponseWriter response) {
         const auto results = json::parse(request.body());
@@ -72,6 +78,9 @@ namespace MyLaps
     }
 
     void RcsServer::get_winner([[maybe_unused]] const Rest::Request& request, Http::ResponseWriter response) {
-        response.send(Http::Code::Ok, "3");
+        const auto ref = request.param(":ref").as<std::string>();
+        const auto winner = _get_winner(ref);
+        json res = {{"winner", winner.first}, {"lap", winner.second}};
+        response.send(Http::Code::Ok, res.dump());
     }
 };
