@@ -26,15 +26,19 @@ set(OPENSSL_USE_STATIC_LIBS TRUE)
 
 enable_testing()
 
+set(EXTERNAL_LIB_INSTALL_DIR ${CMAKE_CURRENT_LIST_DIR}/build)
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 list(APPEND CMAKE_PREFIX_PATH
     ${EXTERNAL_LIB_INSTALL_DIR}/pistache
+    ${EXTERNAL_LIB_INSTALL_DIR}/json
 )
 
 find_package(Pistache REQUIRED)
 set_target_properties(pistache_static PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${Pistache_INCLUDE_DIRS}"
 )
+find_package(nlohmann_json REQUIRED)
 
 add_subdirectory(server)

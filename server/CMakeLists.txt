@@ -5,4 +5,5 @@ add_executable(RCSServer
 
 target_link_libraries(RCSServer PRIVATE
         pistache_static
+        nlohmann_json::nlohmann_json
 )

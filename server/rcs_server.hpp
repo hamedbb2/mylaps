@@ -4,6 +4,7 @@
 #include <pistache/endpoint.h>
 #include <pistache/http.h>
 #include <pistache/router.h>
+#include <string>
 
 namespace MyLaps {
 using namespace Pistache;
@@ -16,6 +17,7 @@ class RcsServer {
 
     private:
         void setup_routes();
+        std::string current_ts();
         void set_results(const Rest::Request& request, Http::ResponseWriter response);
         void get_results(const Rest::Request& request, Http::ResponseWriter response);
         void get_winner(const Rest::Request& request, Http::ResponseWriter response);
